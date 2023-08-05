@@ -1,5 +1,13 @@
-# BakkesModStarterPlugin
+# PythonPlugin
 
-This is a basic starter plugin for BakkesMod. It's described in the new BakkesMod programming server
+## Plugin info
+This is a Bakkesmod plugin which integrates a python interpreter and python bindings to the bakkesmod sdk. This is a extremely early release. Stuff will probably not work as expected. And there is quite limited support for python intellisense.
 
-[https://discord.gg/XrKqyu3Bjk](https://discord.gg/XrKqyu3Bjk)
+## TODO
+Reload button crashes, reload command not
+
+unload python interpreter
+
+intellisense for python module
+
+better setup (include python)

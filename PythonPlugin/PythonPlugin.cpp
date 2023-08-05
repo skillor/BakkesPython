@@ -10,7 +10,7 @@ using namespace py::literals;
 #include <pybakke.h>
 
 
-BAKKESMOD_PLUGIN(PythonPlugin, "Python Plugin", plugin_version, PLUGINTYPE_THREADED)
+BAKKESMOD_PLUGIN(PythonPlugin, "Python Plugin", plugin_version, PLUGINTYPE_FREEPLAY)
 
 std::shared_ptr<CVarManagerWrapper> _globalCvarManager;
 std::shared_ptr<GameWrapper> _globalGameWrapper;
@@ -21,7 +21,7 @@ void PythonPlugin::onLoad()
 	_globalCvarManager = cvarManager;
 	_globalGameWrapper = gameWrapper;
 
-	py::scoped_interpreter interpreter{};
+	py::initialize_interpreter();
 
 	auto pybakkes = py::module::import("pybakke");
 	auto locals = py::dict("GAME_WRAPPER"_a = _globalGameWrapper, "CVAR_MANAGER"_a = _globalCvarManager);
@@ -48,13 +48,16 @@ void PythonPlugin::onLoad()
 					CVAR_MANAGER.log('Loaded module "{}" from "{}"'.format(module.name, module_dir))
 				except Exception as e:
 					CVAR_MANAGER.log('Failed loading module "{}" from "{}": {}'.format(module.name, module_dir, e))
+		modules = list(modules.keys())
 	)", py::globals(), locals);
+
+	pyModules = locals["modules"].cast<std::vector<std::string>>();
+
 	LOG("Loaded PythonPlugin");
 }
 
 void PythonPlugin::onUnload() {
-	/*
-	auto locals = py::dict("LOADED_MODULES"_a = py::cast(loadedModules));
+	auto locals = py::dict("LOADED_MODULES"_a = pyModules, "CVAR_MANAGER"_a = _globalCvarManager);
 	py::exec(R"(
 		import pybakke
 		import sys
@@ -68,6 +71,7 @@ void PythonPlugin::onUnload() {
 			except Exception as e:
 				CVAR_MANAGER.log('Failed unloading module "{}": {}'.format(module, e))
 	)", py::globals(), locals);
-	*/
+	pyModules.clear();
+	// py::finalize_interpreter();
 	LOG("Unloaded PythonPlugin");
 }
