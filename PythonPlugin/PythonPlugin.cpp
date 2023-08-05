@@ -23,7 +23,7 @@ void PythonPlugin::onLoad()
 
 	py::scoped_interpreter interpreter{};
 
-	auto pybakkes = py::module_::import("pybakke");
+	auto pybakkes = py::module::import("pybakke");
 	auto locals = py::dict("GAME_WRAPPER"_a = _globalGameWrapper, "CVAR_MANAGER"_a = _globalCvarManager);
 	py::exec(R"(
 		import pybakke
