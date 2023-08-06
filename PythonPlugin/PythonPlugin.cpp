@@ -21,9 +21,27 @@ void PythonPlugin::onLoad()
 	_globalCvarManager = cvarManager;
 	_globalGameWrapper = gameWrapper;
 
+	_globalCvarManager->registerNotifier("python_reload", std::bind(&PythonPlugin::softReload, this), "Reloads all python modules", PERMISSION_ALL);
+
 	py::initialize_interpreter();
 
 	auto pybakkes = py::module::import("pybakke");
+
+	this->loadModules();
+	
+	LOG("Loaded PythonPlugin");
+}
+
+void PythonPlugin::onUnload() {
+
+	this->unloadModules();
+
+	// py::finalize_interpreter();
+
+	LOG("Unloaded PythonPlugin");
+}
+
+void PythonPlugin::loadModules() {
 	auto locals = py::dict("GAME_WRAPPER"_a = _globalGameWrapper, "CVAR_MANAGER"_a = _globalCvarManager);
 	py::exec(R"(
 		import pybakke
@@ -52,12 +70,10 @@ void PythonPlugin::onLoad()
 	)", py::globals(), locals);
 
 	pyModules = locals["modules"].cast<std::vector<std::string>>();
-
-	LOG("Loaded PythonPlugin");
 }
 
-void PythonPlugin::onUnload() {
-	auto locals = py::dict("LOADED_MODULES"_a = pyModules, "CVAR_MANAGER"_a = _globalCvarManager);
+void PythonPlugin::unloadModules() {
+	auto locals = py::dict("LOADED_MODULES"_a = pyModules, "GAME_WRAPPER"_a = _globalGameWrapper, "CVAR_MANAGER"_a = _globalCvarManager);
 	py::exec(R"(
 		import pybakke
 		import sys
@@ -71,7 +87,11 @@ void PythonPlugin::onUnload() {
 			except Exception as e:
 				CVAR_MANAGER.log('Failed unloading module "{}": {}'.format(module, e))
 	)", py::globals(), locals);
+
 	pyModules.clear();
-	// py::finalize_interpreter();
-	LOG("Unloaded PythonPlugin");
+}
+
+void PythonPlugin::softReload() {
+	this->unloadModules();
+	this->loadModules();
 }

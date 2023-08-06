@@ -20,6 +20,10 @@ class PythonPlugin: public BakkesMod::Plugin::BakkesModPlugin,
 	//Boilerplate
 	void onLoad() override;
 	void onUnload() override;
+	void loadModules();
+	void unloadModules();
+	void softReload();
+
 public:
 	void RenderSettings() override; // Uncomment if you wanna render your own tab in the settings menu
 	//void RenderWindow() override; // Uncomment if you want to render your own plugin window

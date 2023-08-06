@@ -11,3 +11,4 @@ unload python interpreter
 intellisense for python module
 
 better setup (include python)
+(when using not embedded python PYTHONHOME and PYTHONPATH have to be set)
